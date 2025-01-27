@@ -7,7 +7,6 @@ import {
   Mail,
   Linkedin,
   Github,
-  Download,
   Send,
   ChevronUp,
   FileText,
@@ -21,7 +20,6 @@ import {
   motion,
   useScroll,
   useSpring,
-  useAnimationControls,
 } from "framer-motion";
 export default function Page() {
   const techStack = [
@@ -111,23 +109,6 @@ export default function Page() {
       // Placeholder image
       link: "https://unibooks-3f5h.onrender.com",
       github: "https://github.com/chijex5/test_public",
-    },
-  ];
-  const featuredProjects = [
-    {
-      title: "D'Footprint",
-      description:
-        "Custom footwear ordering platform with real-time admin control",
-      tech: ["Next.js", "Flask", "PostgreSQL"],
-      link: "#",
-      github: "#",
-    },
-    {
-      title: "UniBooks",
-      description: "Digital marketplace for campus book exchange",
-      tech: ["React", "Firebase", "Algolia"],
-      link: "#",
-      github: "#",
     },
   ];
   const skills = {
