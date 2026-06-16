@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import {
   Reveal,
@@ -298,6 +300,383 @@ export function Work() {
           <FoodifyMockup />
         </ProjectFrame>
       </Reveal>
+    </section>
+  );
+}
+
+/* -------- LAB DEMO SUB-COMPONENTS -------- */
+const typewriterPhrases = [
+  "Full-stack developer.",
+  "API architect.",
+  "UI craftsperson.",
+  "Problem solver.",
+];
+
+function SpringDrag() {
+  const constraintRef = useRef<HTMLDivElement>(null);
+  return (
+    <div
+      ref={constraintRef}
+      className="relative flex h-full w-full items-center justify-center"
+    >
+      <motion.div
+        drag
+        dragConstraints={constraintRef}
+        dragElastic={0.2}
+        dragTransition={{ bounceDamping: 18, bounceStiffness: 300 }}
+        whileDrag={{ scale: 1.15 }}
+        className="h-14 w-14 cursor-grab rounded-full bg-blue active:cursor-grabbing"
+        style={{ boxShadow: "0 0 28px rgba(43,43,240,0.45)" }}
+      />
+    </div>
+  );
+}
+
+function Typewriter() {
+  const [phraseIdx, setPhraseIdx] = useState(0);
+  const [text, setText] = useState("");
+  const [deleting, setDeleting] = useState(false);
+
+  useEffect(() => {
+    const phrase = typewriterPhrases[phraseIdx];
+    const delay = deleting ? 45 : text.length === phrase.length ? 1200 : 85;
+    const timer = setTimeout(() => {
+      if (!deleting) {
+        if (text.length < phrase.length) {
+          setText(phrase.slice(0, text.length + 1));
+        } else {
+          setDeleting(true);
+        }
+      } else {
+        if (text.length > 0) {
+          setText(text.slice(0, -1));
+        } else {
+          setDeleting(false);
+          setPhraseIdx((i) => (i + 1) % typewriterPhrases.length);
+        }
+      }
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [text, deleting, phraseIdx]);
+
+  return (
+    <div className="flex h-full w-full items-center justify-center px-4">
+      <p className="m-0 text-center font-display text-[clamp(16px,2vw,20px)] font-bold leading-[1.3] text-cream">
+        {text}
+        <span
+          className="ml-0.5 inline-block w-[2px] animate-blink bg-blue align-middle"
+          style={{ height: "1em" }}
+        />
+      </p>
+    </div>
+  );
+}
+
+type Ripple = { id: number; x: number; y: number };
+
+function RippleCanvas() {
+  const [ripples, setRipples] = useState<Ripple[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const id = Date.now();
+    setRipples((r) => [
+      ...r,
+      { id, x: e.clientX - rect.left, y: e.clientY - rect.top },
+    ]);
+    setTimeout(
+      () => setRipples((r) => r.filter((rip) => rip.id !== id)),
+      900,
+    );
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      onClick={handleClick}
+      className="relative flex h-full w-full cursor-pointer items-center justify-center overflow-hidden"
+    >
+      <span className="pointer-events-none font-mono text-[11px] uppercase tracking-[0.14em] text-[#8f8d80]">
+        Click anywhere
+      </span>
+      {ripples.map((rip) => (
+        <motion.div
+          key={rip.id}
+          initial={{ scale: 0, opacity: 0.8 }}
+          animate={{ scale: 4.5, opacity: 0 }}
+          transition={{ duration: 0.9, ease: "easeOut" }}
+          style={{
+            position: "absolute",
+            left: rip.x - 24,
+            top: rip.y - 24,
+            width: 48,
+            height: 48,
+          }}
+          className="pointer-events-none rounded-full border-2 border-blue"
+        />
+      ))}
+    </div>
+  );
+}
+
+function GradientFollow() {
+  const [pos, setPos] = useState({ x: 50, y: 50 });
+  return (
+    <div
+      onMouseMove={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        setPos({
+          x: ((e.clientX - rect.left) / rect.width) * 100,
+          y: ((e.clientY - rect.top) / rect.height) * 100,
+        });
+      }}
+      className="flex h-full w-full items-center justify-center"
+      style={{
+        backgroundImage: `radial-gradient(circle at ${pos.x}% ${pos.y}%, rgba(43,43,240,0.5) 0%, rgba(31,164,99,0.18) 40%, transparent 70%)`,
+      }}
+    >
+      <span className="pointer-events-none font-mono text-[11px] uppercase tracking-[0.14em] text-[#8f8d80]">
+        Move cursor
+      </span>
+    </div>
+  );
+}
+
+const experiments = [
+  {
+    title: "Spring physics",
+    description: "Drag the orb — it snaps back with spring physics.",
+    Demo: SpringDrag,
+  },
+  {
+    title: "Typewriter",
+    description: "Character-by-character text animation with delete loop.",
+    Demo: Typewriter,
+  },
+  {
+    title: "Ripple",
+    description: "Click-triggered expanding ring cascade.",
+    Demo: RippleCanvas,
+  },
+  {
+    title: "Gradient follow",
+    description: "Radial gradient tracks the cursor position.",
+    Demo: GradientFollow,
+  },
+];
+
+/* ---------------- LAB ---------------- */
+export function Lab() {
+  return (
+    <section id="lab" className="bg-ink text-cream">
+      <div className={`${MAXW} ${PAD} py-[clamp(64px,9vw,120px)]`}>
+        <Reveal className="mb-[clamp(48px,6vw,80px)] flex flex-wrap items-start justify-between gap-8">
+          <div>
+            <span className="mb-3 block font-mono text-[12px] uppercase tracking-[0.14em] text-[#8f8d80]">
+              Experiments
+            </span>
+            <h2 className="m-0 font-display text-[clamp(30px,4vw,52px)] font-bold tracking-[-0.02em] text-cream">
+              Lab
+            </h2>
+          </div>
+          <p className="m-0 max-w-[40ch] text-[15px] leading-[1.7] text-[#c9c7bd] [text-wrap:pretty]">
+            Small interactive experiments — a space to explore animation,
+            physics, and interface ideas outside of client work.
+          </p>
+        </Reveal>
+
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          {experiments.map((exp, i) => (
+            <Reveal key={exp.title} delay={i * 0.07}>
+              <div className="overflow-hidden rounded-2xl border border-[rgba(244,241,233,0.1)] bg-[rgba(244,241,233,0.04)]">
+                <div className="h-48">
+                  <exp.Demo />
+                </div>
+                <div className="border-t border-[rgba(244,241,233,0.08)] p-5">
+                  <h3 className="m-0 font-display text-[17px] font-semibold text-cream">
+                    {exp.title}
+                  </h3>
+                  <p className="m-0 mt-1.5 text-[13.5px] leading-[1.5] text-[#8f8d80]">
+                    {exp.description}
+                  </p>
+                </div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------------- WRITING ---------------- */
+// TODO: Replace with your real articles
+const articles = [
+  {
+    title: "Article title",
+    platform: "Medium",
+    date: "Month YYYY",
+    excerpt:
+      "A short description of what this article covers and why you wrote it.",
+    href: "#",
+  },
+  {
+    title: "Article title",
+    platform: "DEV.to",
+    date: "Month YYYY",
+    excerpt:
+      "A short description of what this article covers and why you wrote it.",
+    href: "#",
+  },
+  {
+    title: "Article title",
+    platform: "Hashnode",
+    date: "Month YYYY",
+    excerpt:
+      "A short description of what this article covers and why you wrote it.",
+    href: "#",
+  },
+];
+
+export function Writing() {
+  return (
+    <section
+      id="writing"
+      className={`${MAXW} ${PAD} py-[clamp(64px,9vw,120px)]`}
+    >
+      <Reveal className="mb-[clamp(48px,6vw,80px)] flex flex-wrap items-baseline justify-between gap-5">
+        <h2 className="m-0 font-display text-[clamp(30px,4vw,52px)] font-bold tracking-[-0.02em] text-ink">
+          Writing
+        </h2>
+        <span className="font-mono text-[13px] text-[#8f8d80]">
+          {articles.length} articles
+        </span>
+      </Reveal>
+
+      <div className="divide-y divide-[rgba(23,22,15,0.08)]">
+        {articles.map((article, i) => (
+          <Reveal key={i} delay={i * 0.06}>
+            <a
+              href={article.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex flex-col gap-3 py-7 no-underline sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="flex flex-col gap-1.5">
+                <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-[#8f8d80]">
+                  {article.platform} · {article.date}
+                </span>
+                <h3 className="m-0 font-display text-[clamp(18px,2vw,24px)] font-semibold text-ink transition-colors group-hover:text-blue">
+                  {article.title}
+                </h3>
+                <p className="m-0 max-w-[52ch] text-[14px] leading-[1.65] text-[#57564d] [text-wrap:pretty]">
+                  {article.excerpt}
+                </p>
+              </div>
+              <ArrowUpRight
+                size={20}
+                className="shrink-0 text-[#8f8d80] transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-blue sm:ml-6"
+              />
+            </a>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ---------------- OPEN SOURCE ---------------- */
+// TODO: Replace with your real GitHub repos
+const repos = [
+  {
+    name: "repo-name",
+    description: "A short description of what this repository does.",
+    language: "TypeScript",
+    langColor: "#2b2bf0",
+    stars: 0,
+    href: "https://github.com/chijex5/repo-name",
+  },
+  {
+    name: "repo-name",
+    description: "A short description of what this repository does.",
+    language: "Python",
+    langColor: "#3572A5",
+    stars: 0,
+    href: "https://github.com/chijex5/repo-name",
+  },
+  {
+    name: "repo-name",
+    description: "A short description of what this repository does.",
+    language: "JavaScript",
+    langColor: "#f1e05a",
+    stars: 0,
+    href: "https://github.com/chijex5/repo-name",
+  },
+];
+
+export function OpenSource() {
+  return (
+    <section
+      id="oss"
+      className={`${MAXW} ${PAD} border-t border-[rgba(23,22,15,0.08)] py-[clamp(64px,9vw,120px)]`}
+    >
+      <Reveal className="mb-[clamp(48px,6vw,80px)] flex flex-wrap items-baseline justify-between gap-5">
+        <h2 className="m-0 font-display text-[clamp(30px,4vw,52px)] font-bold tracking-[-0.02em] text-ink">
+          Open source
+        </h2>
+        <a
+          href="https://github.com/chijex5"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-mono text-[13px] text-[#57564d] no-underline transition-colors hover:text-ink"
+        >
+          github.com/chijex5 ↗
+        </a>
+      </Reveal>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {repos.map((repo, i) => (
+          <Reveal key={i} delay={i * 0.06}>
+            <a
+              href={repo.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group block rounded-xl border border-[rgba(23,22,15,0.1)] p-5 no-underline transition-colors hover:border-[rgba(23,22,15,0.28)]"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <h3 className="m-0 font-mono text-[14px] font-semibold text-ink transition-colors group-hover:text-blue">
+                  {repo.name}
+                </h3>
+                <ArrowUpRight
+                  size={15}
+                  className="mt-0.5 shrink-0 text-[#8f8d80] transition-colors group-hover:text-blue"
+                />
+              </div>
+              <p className="m-0 mt-2 text-[13.5px] leading-[1.6] text-[#57564d]">
+                {repo.description}
+              </p>
+              <div className="mt-4 flex items-center gap-4">
+                <div className="flex items-center gap-1.5">
+                  <span
+                    className="h-[10px] w-[10px] rounded-full"
+                    style={{ background: repo.langColor }}
+                  />
+                  <span className="font-mono text-[12px] text-[#8f8d80]">
+                    {repo.language}
+                  </span>
+                </div>
+                {repo.stars > 0 && (
+                  <span className="font-mono text-[12px] text-[#8f8d80]">
+                    ★ {repo.stars}
+                  </span>
+                )}
+              </div>
+            </a>
+          </Reveal>
+        ))}
+      </div>
     </section>
   );
 }
