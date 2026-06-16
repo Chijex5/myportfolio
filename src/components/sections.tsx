@@ -88,7 +88,7 @@ export function Hero() {
         <p className="m-0 max-w-[46ch] text-[clamp(16px,1.5vw,19px)] leading-[1.6] text-[#444339] [text-wrap:pretty]">
           I&apos;m <span className="font-semibold text-ink">Chijioke</span> — a
           full-stack developer who designs the data model, builds the API, and
-          sweats the interface. Below are three products I took from idea to
+          sweats the interface. Below are some products I took from idea to
           shipped.
         </p>
         <MagneticLink
